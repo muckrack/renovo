@@ -1,0 +1,43 @@
+version: 2
+registries:
+  python-index-pypi-fury-io-sawhorsemedia:
+    type: python-index
+    url: https://pypi.fury.io/sawhorsemedia/
+    token: "${{secrets.PYTHON_INDEX_PYPI_FURY_IO_SAWHORSEMEDIA_TOKEN}}"
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly
+      time: "23:00"
+      timezone: US/Eastern
+    open-pull-requests-limit: 10
+    insecure-external-code-execution: allow
+    groups:
+      boto3:
+        patterns:
+          - aioboto3
+          - aiobotocore
+          - aiobotocore-stubs
+          - boto3
+          - boto3-stubs
+          - botocore
+          - botocore-stubs
+          - types-aiobotocore
+          - types-aiobotocore-*
+          - types-boto3
+          - types-botocore
+      pydantic:
+        patterns:
+          - pydantic
+          - pydantic-core
+          - pydantic-extra-types
+          - pydantic-settings
+    ignore: # sc-98934, keep these on same version across all projects
+      - dependency-name: "ruff"
+      - dependency-name: "docformatter"
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-patch
+    registries:
+      - python-index-pypi-fury-io-sawhorsemedia

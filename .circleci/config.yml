@@ -1,0 +1,36 @@
+---
+version: 2.1
+
+orbs:
+  
+  python: muckrack/python@0.1.0
+
+executors:
+  test:
+    docker:
+      - image: cimg/python:3.11
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - python/test:
+          executor: test
+          uv: true
+          context:
+            - Gemfury
+          filters:
+            tags:
+              only: /.*/
+      - python/publish:
+          uv: true
+          context:
+            - Gemfury
+          requires:
+            - python/test
+          # https://circleci.com/docs/workflows/#executing-workflows-for-a-git-tag
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

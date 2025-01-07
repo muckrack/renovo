@@ -1,0 +1,8 @@
+_commit: v2024.12.16-7-ga88732c
+_src_path: git@github.com:muckrack/copier-python.git
+is_service: false
+package_name: muckrack-hmr
+project_name: python-hmr
+python_version: '3.11'
+semver: true
+team: platform
