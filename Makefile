@@ -26,4 +26,4 @@ lint:
 
 .PHONY: test
 test:
-	pytest -v
+	PYTHONPATH=./tests pytest -v
