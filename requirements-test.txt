@@ -10,11 +10,11 @@ pluggy==1.5.0
     # via pytest
 pytest==8.3.4
     # via
-    #   muckrack-python-hmr (pyproject.toml)
+    #   muckrack-hmr (pyproject.toml)
     #   pytest-cov
 pytest-cov==6.0.0
-    # via muckrack-python-hmr (pyproject.toml)
+    # via muckrack-hmr (pyproject.toml)
 ruff==0.5.7
-    # via muckrack-python-hmr (pyproject.toml)
+    # via muckrack-hmr (pyproject.toml)
 tomli==2.2.1
     # via coverage

@@ -1,9 +1,9 @@
 # Python Hot Module Replacement
-`muckrack-python-hmr` is a Python library that allows for hot module replacement, enabling you to reload modules and their dependencies dynamically during runtime. This is useful for development and debugging purposes.
+`muckrack-hmr` is a Python library that allows for hot module replacement, enabling you to reload modules and their dependencies dynamically during runtime. This is useful for development and debugging purposes.
 
 The idea of hot module replacement is commonly found in frontend dev tooling, such as [webpack](https://webpack.js.org/concepts/hot-module-replacement/).
 However, nothing reliable exists for Python. Other libraries, tools, and frameworks like Django, for example, restart the entire process.
-This can be painfully slow in larger code bases. `muckrack-python-hmr` dynamically replaces all references to the updated module with the new version in milliseconds.
+This can be painfully slow in larger code bases. `muckrack-hmr` dynamically replaces all references to the updated module with the new version in milliseconds.
 
 ## Highlights
 - 🔥 **Blazing Fast Reloads**: Reload modules and their dependencies in **milliseconds**.
