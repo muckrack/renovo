@@ -1,0 +1,29 @@
+---
+default_stages: [pre-commit]
+default_language_version:
+  python: python3
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.5.2'
+    hooks:
+      - id: ruff
+        args:
+          - --fix
+      - id: ruff-format
+
+  - repo: https://github.com/PyCQA/docformatter
+    rev: eb1df347edd128b30cd3368dddc3aa65edcfac38
+    hooks:
+    - id: docformatter
+      args:
+        - --in-place
+        - --pre-summary-newline
+        - --wrap-summaries=0
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.3.5
+    hooks:
+      - id: pip-compile
+        name: pip-compile requirements-test.txt
+        entry: make requirements-test.txt
+        files: '^pyproject\.toml|requirements-test\.txt$'
