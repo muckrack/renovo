@@ -12,7 +12,7 @@ pytest==8.3.4
     # via
     #   renovo (pyproject.toml)
     #   pytest-cov
-pytest-cov==6.0.0
+pytest-cov==6.1.0
     # via renovo (pyproject.toml)
 ruff==0.5.7
     # via renovo (pyproject.toml)
