@@ -18,7 +18,7 @@ This can be painfully slow in larger code bases. Renovo dynamically replaces all
 
 ## Quick Start
 
-HMR needs to be the first thing injected into the Python process because it wraps `builtins.__import__` to add dependency tracking.
+HMR needs to be the first thing injected into the Python process because it currently monkey-patches `builtins.__import__` to track module dependencies. While this approach works reliably, future versions aim to leverage Python's importlib machinery for a more standard implementation.
 
 Run your script with the `-m renovo` option to enable hot module replacement:
 
