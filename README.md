@@ -51,49 +51,74 @@ foo.py ran with HMR off
 
 ### Reloading Your First Module
 
+Let's see HMR in action with a practical example:
+
 ```python
 # foo.py
 def baz():
-  print("Second")
+    print("Second")
 
 def bar():
-  print("First")
-  baz()
+    print("First")
+    baz()
 ```
+
+Now we'll create a main file that uses this module:
 
 ```python
 # main.py
 import builtins
 from foo import bar
 
-bar()
-# Prints:
-# First
-# Second
-input("Edit foo.py, comment out the call to baz() in the bar() function. Hit enter when you've saved the changes to foo.py")
-builtins.___hmr__.reload_module("foo")
-bar()
-# Prints:
-# First
+# Initial function call
+print("Initial call:")
+bar()  # Outputs: "First" followed by "Second"
+
+# Now let's simulate making a change to foo.py
+# In a real scenario, you'd edit foo.py in your editor and save the file
+# Then reload the module with HMR
+
+input("Press Enter after you've modified foo.py...")
+
+# Reload the modified module
+reloaded_modules, duration = builtins.__hmr__.reload_module("foo")
+print(f"Reloaded {len(reloaded_modules)} module(s) in {duration:.2f}ms")
+
+# Call the function again to see the changes
+print("\nAfter modifying foo.py:")
+bar()  # The behavior will reflect your changes
 ```
+
+For example, if you modify `foo.py` to look like this:
 
 ```python
-# foo.py -- after editing
+# foo.py (after modification)
 def baz():
-  print("Second")
+    print("Second - MODIFIED!")
 
 def bar():
-  print("First")
-  # baz()
+    print("First - MODIFIED!")
+    baz()
 ```
 
-Notice how calling `foo.bar()` after editing `foo.py` with `builtins.___hmr__.reload_module("foo")` now only prints "First" instead of "First" and "Second"
-because we commented out `baz()`. The module `foo` and its function `bar` have their references updated to the new function.
+When you run the main script and press Enter after modifying foo.py, the output will show:
 
-`builtins.__hmr__.reload_module` has the exact same interface as [`importlib.reload_module`](https://docs.python.org/3/library/importlib.html#importlib.import_module).
+```
+Initial call:
+First
+Second
 
-The major difference between `builtins.__hmr__.reload_module` and `importlib.reload_module` is HMR tracks dependencies and updates those modules that depend on `foo.py`.
-`importlib` does not track dependencies which means all files that import `foo.py` will reference the old, outdatted code before our edit.
+Press Enter after you've modified foo.py...
+Reloaded 1 module(s) in 3.45ms
+
+After modifying foo.py:
+First - MODIFIED!
+Second - MODIFIED!
+```
+
+This demonstrates how HMR updates all references to the module, allowing you to see your changes immediately without restarting the Python process.
+
+The key difference between `builtins.__hmr__.reload_module` and Python's built-in `importlib.reload` is that HMR tracks dependencies. When you reload a module with HMR, it also updates all modules that depend on it, ensuring consistent behavior throughout your application.
 
 Note: Django's runserver will not function properly because of their own conflicting reloading logic that restarts the process.
 
