@@ -250,10 +250,6 @@ This partial update happens because:
 - When that old function calls `baz()`, it looks it up in the module's namespace, which has been updated
 - So you see the old `bar()` output but the updated `baz()` output
 
-## Best Practices
-
-### Use Module References
-
 For the most reliable HMR experience:
 
 1. Use fully qualified imports in your main script (`import foo` instead of `from foo import bar`)
