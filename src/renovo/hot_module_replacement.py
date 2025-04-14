@@ -92,9 +92,20 @@ class HotModuleReplacement:
 
     def _reload_single_module(self, module_name: str) -> float:
         start_time = timeit.default_timer()
-        module = importlib.import_module(module_name)
-        importlib.reload(module)
-        return timeit.default_timer() - start_time
+        # Skip reloading __main__ as it can't be properly reloaded
+        if module_name == "__main__":
+            self.logger.debug("Skipping reload of __main__ module")
+            return 0.0
+        try:
+            module = importlib.import_module(module_name)
+            importlib.reload(module)
+            return timeit.default_timer() - start_time
+        except ModuleNotFoundError as e:
+            self.logger.warning(f"Module {module_name} not found: {str(e)}")
+            return timeit.default_timer() - start_time
+        except Exception as e:
+            self.logger.error(f"Error reloading module {module_name}: {str(e)}")
+            raise
 
     def _run_hooks(self, hooks: list[Callable[[str], None]], module_name: str) -> None:
         for hook in hooks:
