@@ -3,23 +3,10 @@ import fnmatch
 import importlib
 import logging
 import timeit
-from collections import defaultdict
 from collections.abc import Callable
-from threading import Lock
 from typing import Any
 
-
-class DependencyTracker:
-    def __init__(self) -> None:
-        self.lock = Lock()
-        self.reverse_dependencies: defaultdict[str, set[str]] = defaultdict(set)
-
-    def add_dependency(self, importer_module: str, dependency: str) -> None:
-        with self.lock:
-            self.reverse_dependencies[dependency].add(importer_module)
-
-    def get_dependents(self, module_name: str) -> set[str]:
-        return self.reverse_dependencies[module_name]
+from renovo.dependency_tracker import DependencyTracker
 
 
 class HotModuleReplacement:
@@ -47,9 +34,11 @@ class HotModuleReplacement:
             fromlist: tuple[str, ...] = (),
             level: int = 0,
         ) -> Any:
+            module = self.original_import(name, globals, locals, fromlist, level)
             importer_module = globals.get("__name__", "__main__") if globals else "__main__"
             self.dependency_graph.add_dependency(importer_module, name)
-            return self.original_import(name, globals, locals, fromlist, level)
+
+            return module
 
         # TODO: There should be a way to use import hooks instead of replacing the built-in __import__ function
         # However, we lose too much information in Finders and Loaders to build the dependency graph
