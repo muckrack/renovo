@@ -16,42 +16,17 @@ This can be painfully slow in larger code bases. Renovo dynamically replaces all
 
 `pip install renovo`
 
-## Usage
+## Quick Start
 
 HMR needs to be the first thing injected into the Python process because it wraps `builtins.__import__` to add dependency tracking.
-`builtins.__hmr__` will be made available to the underlying Python code for further customization if you so desire.
-You should invoke this module as a script for the best results.
 
-### Invoke HMR Module as a Script
-
-Invoke any Python script as you normally would, just with the `-m renovo` option to turn on HMR.
+Run your script with the `-m renovo` option to enable hot module replacement:
 
 ```console
 $ python -m renovo <script> [arguments...]
 ```
 
-This will make the HMR module available in your codebase as `builtins.__hmr__`
-
-```python
-# foo.py
-import builtins
-if getattr(builtins, "__hmr__", None):
-    print("foo.py ran with HMR on")
-else:
-    print("foo.py ran with HMR off")
-```
-
-```console
-$ python -m renovo foo.py
-foo.py ran with HMR on
-
-$ python foo.py
-foo.py ran with HMR off
-```
-
-### Reloading Your First Module
-
-Let's see HMR in action with a practical example:
+This makes `builtins.__hmr__` available in your code. Here's a simple example:
 
 ```python
 # foo.py
@@ -63,21 +38,19 @@ def bar():
     baz()
 ```
 
-Now we'll create a main file that uses this module:
+Now we'll create a main file that uses this module and demonstrates HMR in action:
 
 ```python
 # main.py
 import builtins
-from foo import bar
+import foo  # Import the module as a whole for best HMR experience
 
 # Initial function call
 print("Initial call:")
-bar()  # Outputs: "First" followed by "Second"
+foo.bar()  # Outputs: "First" followed by "Second"
 
 # Now let's simulate making a change to foo.py
 # In a real scenario, you'd edit foo.py in your editor and save the file
-# Then reload the module with HMR
-
 input("Press Enter after you've modified foo.py...")
 
 # Reload the modified module
@@ -86,7 +59,7 @@ print(f"Reloaded {len(reloaded_modules)} module(s) in {duration:.2f}ms")
 
 # Call the function again to see the changes
 print("\nAfter modifying foo.py:")
-bar()  # The behavior will reflect your changes
+foo.bar()  # The behavior will reflect your changes
 ```
 
 For example, if you modify `foo.py` to look like this:
@@ -117,11 +90,9 @@ First - MODIFIED!
 Second - MODIFIED!
 ```
 
-This demonstrates how HMR updates all references to the module, allowing you to see your changes immediately without restarting the Python process.
-
 The key difference between `builtins.__hmr__.reload_module` and Python's built-in `importlib.reload` is that HMR tracks dependencies. When you reload a module with HMR, it also updates all modules that depend on it, ensuring consistent behavior throughout your application.
 
-Note: Django's runserver will not function properly because of their own conflicting reloading logic that restarts the process.
+## Detailed Usage
 
 ### Reloading on File Changes
 
@@ -185,9 +156,11 @@ $ python -m renovo watch.py
 ✅ Reloaded 1 module(s) in 2.24ms
 ```
 
-## Hooks
+## Advanced Features
 
-Hooks can be used to further customize the behaviour of your code around the import system:
+### Hooks
+
+Hooks can be used to further customize the behavior of your code around the import system:
 
 - Before reloading `add_pre_reload_hook`
 - After reloading `add_post_reload_hook`
@@ -219,3 +192,76 @@ reloaded_modules, total_time = builtins.__hmr__.reload_module("my_module")
 print(f"Reloaded modules: {reloaded_modules}")
 print(f"Total reload time: {total_time}ms")
 ```
+
+## Limitations and Gotchas
+
+### The `__main__` Module and Direct Imports
+
+The `__main__` module (your entry script) is special in Python and has unique behavior with hot module replacement:
+
+1. The `__main__` module itself cannot be reloaded
+2. Objects directly imported into `__main__` using `from module import object` will not be updated when their source module is reloaded
+
+Here's what happens in a typical scenario:
+
+```python
+# in main.py (running as __main__)
+from foo import bar  # Direct import creates a reference that won't be updated
+
+# Initial call works as expected
+print("Initial call:")
+bar()  # Outputs original behavior
+
+input("Press Enter after you've modified foo.py...")
+reloaded_modules, duration = builtins.__hmr__.reload_module("foo")
+print(f"Reloaded {len(reloaded_modules)} module(s) in {duration:.2f}ms")
+
+print("\nAfter modifying foo.py:")
+bar()  # Still uses the old version of bar()
+
+# But this works correctly:
+print("\nImporting foo as a module:")
+import foo
+foo.bar()  # This will use the newly reloaded version
+```
+
+Example output
+
+```console
+$ python -m renovo main.py
+Initial call:
+First
+Second
+Press Enter after you've modified foo.py...
+Reloaded 1 module(s) in 3.45ms
+
+After modifying foo.py:
+First             # This line is from the old bar() function
+Second - MODIFIED! # This line shows updated baz() being called by bar()
+
+Importing foo as a module:
+First - MODIFIED!
+Second - MODIFIED!
+```
+
+This partial update happens because:
+
+- The old `bar()` function in `__main__`'s namespace stays intact (prints "First")
+- When that old function calls `baz()`, it looks it up in the module's namespace, which has been updated
+- So you see the old `bar()` output but the updated `baz()` output
+
+## Best Practices
+
+### Use Module References
+
+For the most reliable HMR experience:
+
+1. Use fully qualified imports in your main script (`import foo` instead of `from foo import bar`)
+2. Access objects through their module (`foo.bar()`)
+3. If you need direct imports, re-import after reloading:
+   ```python
+   builtins.__hmr__.reload_module("foo")
+   from foo import bar  # Get the updated reference
+   ```
+
+Regular modules (not `__main__`) don't have this limitation. When Renovo reloads a module, all other modules that import it will automatically use the updated code.

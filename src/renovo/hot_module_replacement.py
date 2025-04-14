@@ -77,6 +77,12 @@ class HotModuleReplacement:
                     return
                 self.logger.debug(f"Reloading module: {module_name}")
                 elapsed_time = self._reload_single_module(module_name)
+
+                # Skip modules that returned -1.0 elapsed time (indicating reload was skipped)
+                if elapsed_time < 0:
+                    self.logger.debug(f"Module {module_name} reload was skipped")
+                    return
+
                 reloaded_modules[module_name] = elapsed_time
                 total_time += elapsed_time
                 for dependency in self.get_dependencies(module_name):
@@ -95,17 +101,14 @@ class HotModuleReplacement:
         # Skip reloading __main__ as it can't be properly reloaded
         if module_name == "__main__":
             self.logger.debug("Skipping reload of __main__ module")
-            return 0.0
+            return -1.0
         try:
             module = importlib.import_module(module_name)
             importlib.reload(module)
             return timeit.default_timer() - start_time
         except ModuleNotFoundError as e:
             self.logger.warning(f"Module {module_name} not found: {str(e)}")
-            return timeit.default_timer() - start_time
-        except Exception as e:
-            self.logger.error(f"Error reloading module {module_name}: {str(e)}")
-            raise
+            return -1.0
 
     def _run_hooks(self, hooks: list[Callable[[str], None]], module_name: str) -> None:
         for hook in hooks:
