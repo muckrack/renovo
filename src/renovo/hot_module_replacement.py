@@ -12,14 +12,13 @@ from typing import Any
 class DependencyTracker:
     def __init__(self) -> None:
         self.lock = Lock()
-        self.reverse_dependencies: defaultdict[str, list[str]] = defaultdict(list)
+        self.reverse_dependencies: defaultdict[str, set[str]] = defaultdict(set)
 
     def add_dependency(self, importer_module: str, dependency: str) -> None:
-        if importer_module not in self.reverse_dependencies[dependency]:
-            with self.lock:
-                self.reverse_dependencies[dependency].append(importer_module)
+        with self.lock:
+            self.reverse_dependencies[dependency].add(importer_module)
 
-    def get_dependents(self, module_name: str) -> list[str]:
+    def get_dependents(self, module_name: str) -> set[str]:
         return self.reverse_dependencies[module_name]
 
 
@@ -65,7 +64,7 @@ class HotModuleReplacement:
     def add_post_reload_hook(self, hook: Callable[[str], None]) -> None:
         self.post_reload_hooks.append(hook)
 
-    def get_dependencies(self, module: str) -> list[str]:
+    def get_dependencies(self, module: str) -> set[str]:
         return self.dependency_graph.get_dependents(module)
 
     def reload_module(self, root_module_name: str) -> tuple[dict[str, float], float]:
