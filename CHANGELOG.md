@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Dependency tracking with threaded queue processing
 - Configurable module inclusion/exclusion patterns
+- Added Limitations and Gotchas to README
 
 ### Changed
 
