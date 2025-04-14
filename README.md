@@ -103,7 +103,8 @@ def bar():
 
 When you run the main script and press Enter after modifying foo.py, the output will show:
 
-```
+```console
+$ python -m renovo main.py
 Initial call:
 First
 Second
