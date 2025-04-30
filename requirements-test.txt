@@ -2,7 +2,7 @@
 #    make requirements-test.txt
 coverage==7.6.10
     # via pytest-cov
-iniconfig==2.0.0
+iniconfig==2.1.0
     # via pytest
 packaging==24.2
     # via pytest
