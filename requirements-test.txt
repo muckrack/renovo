@@ -4,7 +4,7 @@ coverage==7.6.10
     # via pytest-cov
 iniconfig==2.0.0
     # via pytest
-packaging==24.2
+packaging==25.0
     # via pytest
 pluggy==1.5.0
     # via pytest
