@@ -16,5 +16,5 @@ pytest-cov==6.0.0
     # via renovo (pyproject.toml)
 ruff==0.5.7
     # via renovo (pyproject.toml)
-tomli==2.2.1
+tomli==2.3.0
     # via coverage
